@@ -11,7 +11,7 @@ fun main() {
         val frequencyMap = mutableMapOf<Char, Int>()
 
         list.forEach {
-            it.toCharArray().toMutableSet().forEach { c ->
+            it.toCharArray().toSet().forEach { c ->
                 frequencyMap.merge(c, 1) { a, b -> a + b }
             }
         }
