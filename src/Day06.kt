@@ -1,26 +1,10 @@
-import java.util.ArrayDeque
 fun main() {
-
-    fun detectSOT(signal: String, uniqueSize: Int = 4): Int {
-        val queue = object : ArrayDeque<Char>(uniqueSize) {
-            override fun push(e: Char) {
-                if (this.size == uniqueSize) {
-                    super.removeLast()
-                }
-                super.push(e)
-            }
-
-            fun isUnique() : Boolean {
-                return (this.toSet().size == this.size)
-            }
+    fun detectSOT(signal: String, size: Int = 4): Int {
+        signal.windowed(size, step=1).forEachIndexed { index, chunk ->
+            if (chunk.toSet().size == size) { return index + size }
         }
 
-        val end = signal.takeWhile {
-            queue.push(it)
-            queue.size < uniqueSize || !queue.isUnique()
-        }
-
-        return end.length + 1 // inclusive of the final match
+        return -1
     }
 
     fun part1(input: List<String>): Int {
