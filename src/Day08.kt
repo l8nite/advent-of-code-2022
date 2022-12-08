@@ -20,6 +20,7 @@ fun main() {
 
                 if (forest[cy][cx] >= forest[y][x]) {
                     visible = false
+                    break
                 }
             }
 
