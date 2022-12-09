@@ -1,25 +1,15 @@
 fun main() {
     fun parseElves(input: List<String>): List<Int> {
-        val elves = mutableListOf<Int>()
-        var total = 0
-
-        input.forEach { calories ->
-            if (calories.isBlank()) {
-                elves.add(total)
-                total = 0
-            } else {
-                total += calories.toInt()
+        return input.fold(mutableListOf(0)) { elves, line ->
+            elves.apply {
+                if (line.isBlank()) add(0) else this[size - 1] += line.toInt()
             }
         }
-
-        elves.add(total)
-
-        return elves
     }
 
     // find the highest-calorie elf
     fun part1(input: List<String>): Int {
-        return parseElves(input).maxOf { it }
+        return parseElves(input).max()
     }
 
     fun part2(input: List<String>): Int {
