@@ -1,5 +1,5 @@
 fun main() {
-    fun getForest(input: List<String>) = input.map { r -> r.map { it.digitToInt() } }
+    fun forest(input: List<String>) = input.map { r -> r.map { it.digitToInt() } }
     fun trees(forest: List<List<Int>>) = forest.flatMapIndexed { y, r -> r.mapIndexed { x, h -> Triple(x, y, h) } }
 
     // the 4 top-level sequences the 4 directions we can travel (left, right, up, down), the inner sequence is the
@@ -14,14 +14,14 @@ fun main() {
     }
 
     fun part1(input: List<String>): Int {
-        val forest = getForest(input)
+        val forest = forest(input)
         return trees(forest).count { (x, y, h) ->
             lineOfSight(forest, x, y).any { it.all { th -> th < h } }
         }
     }
 
     fun part2(input: List<String>): Int {
-        val forest = getForest(input)
+        val forest = forest(input)
         return trees(forest).maxOf { (x, y, h) ->
             lineOfSight(forest, x, y).map { viewingDistance(it, h)}.reduce(Int::times)
         }
