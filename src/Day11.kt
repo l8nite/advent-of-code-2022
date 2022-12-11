@@ -22,7 +22,7 @@ class Monkey(
             }
         }
 
-        inspected += items.size.toLong()
+        inspected += items.size
 
         items.clear()
     }
