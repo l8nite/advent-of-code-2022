@@ -1,14 +1,13 @@
-import java.math.BigInteger
 
 class Monkey(
-    private val items: MutableList<BigInteger>,
-    val operation: ((BigInteger) -> BigInteger),
-    val divisor: BigInteger,
+    private val items: MutableList<Long>,
+    val operation: ((Long) -> Long),
+    val divisor: Long,
     private val trueTarget: Int,
     private val falseTarget: Int,
-    var worry: ((BigInteger) -> (BigInteger))? = null
+    var worry: ((Long) -> (Long))? = null
 ) {
-    var inspected: BigInteger = BigInteger.ZERO
+    var inspected: Long = 0L
 
     fun inspect(monkeys: List<Monkey>) {
         items.forEach {
@@ -16,14 +15,14 @@ class Monkey(
 
             item = worry?.invoke(item) ?: item
 
-            if (item % divisor == BigInteger.ZERO) {
+            if (item % divisor == 0L) {
                 monkeys[trueTarget].items.add(item)
             } else {
                 monkeys[falseTarget].items.add(item)
             }
         }
 
-        inspected += items.size.toBigInteger()
+        inspected += items.size.toLong()
 
         items.clear()
     }
@@ -50,22 +49,22 @@ fun parseMonkey(input: List<String>): Monkey {
         divisor,
         trueTarget,
         falseTarget
-    ) { n -> n / BigInteger.valueOf(3) }
+    ) { n -> n / 3L }
 }
 
-fun parseItems(input: String): MutableList<BigInteger> {
+fun parseItems(input: String): MutableList<Long> {
     val itemsRegex = "^\\s*Starting items: (.+)+$".toRegex()
     val (itemString) = itemsRegex.matchEntire(input)!!.destructured
-    return itemString.split(", ".toRegex()).map(String::toBigInteger).toMutableList()
+    return itemString.split(", ".toRegex()).map(String::toLong).toMutableList()
 }
 
-fun parseOperation(input: String): ((BigInteger) -> BigInteger) {
+fun parseOperation(input: String): ((Long) -> Long) {
     val operationRegex = "^\\s*Operation: new = (.+?) ([*+]) (.+?)$".toRegex()
     val (l, o, r) = operationRegex.matchEntire(input)!!.destructured
 
-    return fun (n: BigInteger): BigInteger  {
-        val left = if (l == "old") n else l.toBigInteger()
-        val right = if (r == "old") n else r.toBigInteger()
+    return fun (n: Long): Long  {
+        val left = if (l == "old") n else l.toLong()
+        val right = if (r == "old") n else r.toLong()
 
         return when (o) {
             "+" -> left + right
@@ -75,10 +74,10 @@ fun parseOperation(input: String): ((BigInteger) -> BigInteger) {
     }
 }
 
-fun parseTestDivisor(input: String): BigInteger {
+fun parseTestDivisor(input: String): Long {
     val testRegex = "^\\s*Test: divisible by (\\d+)$".toRegex()
     val (divisor) = testRegex.matchEntire(input)!!.destructured
-    return divisor.toBigInteger()
+    return divisor.toLong()
 }
 
 fun parseTrueFalseTargets(trueInput: String, falseInput: String): Pair<Int,Int> {
@@ -89,7 +88,7 @@ fun parseTrueFalseTargets(trueInput: String, falseInput: String): Pair<Int,Int> 
 }
 
 fun main() {
-    fun part1(input: List<String>): BigInteger {
+    fun part1(input: List<String>): Long {
         val monkeys = input.chunked(7).map { parseMonkey(it) }
 
         repeat(20) {
@@ -100,10 +99,10 @@ fun main() {
         return top2[0] * top2[1]
     }
 
-    fun part2(input: List<String>): BigInteger {
+    fun part2(input: List<String>): Long {
         val monkeys = input.chunked(7).map { parseMonkey(it) }
         val lcm = monkeys.map { it.divisor }.reduce { acc, n -> acc * n }
-        val function = { n: BigInteger -> n % lcm }
+        val function = { n: Long -> n % lcm }
         monkeys.forEach { it.worry = function }
 
         repeat(10000) {
@@ -116,8 +115,8 @@ fun main() {
 
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day11_test")
-    check(part1(testInput) == BigInteger.valueOf(10605))
-    check(part2(testInput) == BigInteger.valueOf(2713310158L))
+    check(part1(testInput) == 10605L)
+    check(part2(testInput) == 2713310158L)
 
     val input = readInput("Day11")
     println(part1(input))
