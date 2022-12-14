@@ -2,7 +2,6 @@ import kotlin.math.max
 import kotlin.math.min
 
 class Location(var x: Int, var y: Int, var type: Char = Type.AIR) {
-
     override fun toString(): String {
         return "($x, $y)"
     }
@@ -20,6 +19,7 @@ class Location(var x: Int, var y: Int, var type: Char = Type.AIR) {
 
     override fun hashCode(): Int = x.hashCode() + y.hashCode()
 }
+
 class Type {
     companion object {
         const val ROCK = '#'
@@ -28,6 +28,7 @@ class Type {
         const val SOURCE = '+'
     }
 }
+
 fun main() {
     val source = Location(500, 0, Type.SOURCE)
 
@@ -65,24 +66,30 @@ fun main() {
         return cave
     }
 
+    fun below(sand: Location) = Location(sand.x, sand.y + 1)
+
+    fun downLeft(sand: Location) = Location(sand.x - 1, sand.y + 1)
+
+    fun downRight(sand: Location) = Location(sand.x + 1, sand.y + 1)
+
     fun part1(input: List<String>): Int {
         val cave = makeCave(input)
         val maxY = cave.maxOf { it.y }
         val sand = Location(source.x, source.y, Type.SAND)
 
         while (sand.y < maxY) {
-            if (!cave.contains(Location(sand.x, sand.y + 1))) {
+            if (!cave.contains(below(sand))) {
                 sand.y += 1
                 continue
             }
 
-            if (!cave.contains(Location(sand.x - 1, sand.y + 1))) {
+            if (!cave.contains(downLeft(sand))) {
                 sand.x -= 1
                 sand.y += 1
                 continue
             }
 
-            if (!cave.contains(Location(sand.x + 1, sand.y + 1))) {
+            if (!cave.contains(downRight(sand))) {
                 sand.x += 1
                 sand.y += 1
                 continue
@@ -106,18 +113,18 @@ fun main() {
         val sand = Location(source.x, source.y, Type.SAND)
 
         while (true) {
-            if (sand.y <= maxY && !cave.contains(Location(sand.x, sand.y + 1))) {
+            if (sand.y <= maxY && !cave.contains(below(sand))) {
                 sand.y += 1
                 continue
             }
 
-            if (sand.y <= maxY && !cave.contains(Location(sand.x - 1, sand.y + 1))) {
+            if (sand.y <= maxY && !cave.contains(downLeft(sand))) {
                 sand.x -= 1
                 sand.y += 1
                 continue
             }
 
-            if (sand.y <= maxY && !cave.contains(Location(sand.x + 1, sand.y + 1))) {
+            if (sand.y <= maxY && !cave.contains(downRight(sand))) {
                 sand.x += 1
                 sand.y += 1
                 continue
