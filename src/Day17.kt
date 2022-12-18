@@ -148,8 +148,6 @@ class Tetris() {
     }
 
     fun advanceCycle(cycleShapeCount: Long, cycleRockHeight: Long) {
-        // if this is called, it means that the current grid has "repeated the cycle", meaning the current map
-        // is exactly what we'd get every time we iterated another time through the cycle...
         shapeCount += cycleShapeCount
         rowsCulled += cycleRockHeight
     }
