@@ -66,9 +66,9 @@ class Tetris() {
         return false
     }
 
-    fun fall(): Boolean { // returns the count of shapes on grid (including the new one just generated)
+    fun fall(): Boolean {
         if (shapeY == 0 || collides(transformGridY = { y -> y -1 })) {
-            blit() // stop moving this shape and move on to the next one
+            blit() // no more moving this shape, and fix it into the grid permanently
             return true
         }
 
@@ -147,9 +147,9 @@ class Tetris() {
         println("")
     }
 
-    fun advanceCycle(cycleShapeCount: Long, cycleRockHeight: Long) {
-        shapeCount += cycleShapeCount
+    fun advanceCycle(cycleRockHeight: Long, cycleShapeCount: Long) {
         rowsCulled += cycleRockHeight
+        shapeCount += cycleShapeCount
     }
 }
 
@@ -160,57 +160,31 @@ fun main() {
         val tetris = Tetris()
         var isBlowing = true
 
-        while (tetris.shapeCount <= shapeCountLimit) {
-            if (isBlowing) {
-                tetris.blow(jetStream[jetStreamIndex])
-                jetStreamIndex++
-                if (jetStreamIndex > jetStream.lastIndex) {
-                    jetStreamIndex = 0
-                }
-            } else {
-                if (tetris.fall()) {
-                    tetris.nextShape()
-                }
-            }
-            isBlowing = !isBlowing
-        }
-
-        val totalHeight = tetris.totalRockHeight()
-        return totalHeight
-    }
-
-    fun part2(input: List<String>, shapeCountLimit: Long = 1000000000000L): Long {
-        val jetStream = input.first().toList()
-        var jetStreamIndex = 0
-        val tetris = Tetris()
-        var isBlowing = true
-
-        val cycleDetection = mutableMapOf<Pair<Int, Int>, Pair<Long,Long>>()
-        var doneCycleDetection = false
+        val cycleDetection = mutableMapOf<Triple<Int, Int, Int>,Pair<Long,Long>>()
+        var cycleDetected = false
 
         while (tetris.shapeCount <= shapeCountLimit) {
             if (isBlowing) {
                 tetris.blow(jetStream[jetStreamIndex])
-                jetStreamIndex = ++jetStreamIndex % jetStream.lastIndex
+                jetStreamIndex = ++jetStreamIndex % jetStream.size
             } else {
                 if (tetris.fall()) {
-                    // each time we blit a new block down to the ground, see if we've repeated this particular gust + shape combo
-                    if (!doneCycleDetection  && tetris.shapeCount > 10000L) { // wait until ~10k shapes before looking for a cycle
-                        val cacheKey = Pair(jetStreamIndex, tetris.shapeIndex)
-                        if (cycleDetection.contains(cacheKey)) {
-                            val cacheVal = cycleDetection[cacheKey]!!
-                            doneCycleDetection = true
-                            // so now, at this point in time, because we've already been here before at this exact shape index and jet index
+                    if (tetris.shapeCount > 2022L) {
+                        // this block has stuck, record the jetStreamIndex, shapeIndex, and hash of the grid layout and map it to the (rock height, shape count) at this point in time
+                        val hashKey = Triple(jetStreamIndex, tetris.shapeIndex, tetris.grid.hashCode())
+                        val hashVal = Pair(tetris.totalRockHeight(), tetris.shapeCount)
+
+                        if (cycleDetection.containsKey(hashKey)) { // we've reached another jetStream, shapeIndex, gridLayout that matches one we saw before...
+                            val cycleDelta = Pair(hashVal.first - cycleDetection[hashKey]!!.first, hashVal.second - cycleDetection[hashKey]!!.second)
+                            println("Cycle at $hashKey; $cycleDelta")
+                            cycleDetection[hashKey] = hashVal
+                            // tetris.draw(false)
                             val shapesRemaining = shapeCountLimit - tetris.shapeCount
-                            val shapesAddedInCycle = (tetris.shapeCount - cacheVal.first)
-                            val heightAddedInCycle = (tetris.totalRockHeight() - cacheVal.second)
-                            val cyclesInShapesRemaining = shapesRemaining / shapesAddedInCycle
-                            println("Found cycle at ${cacheKey}: ${cacheVal}, which added $shapesAddedInCycle shapes and $heightAddedInCycle height")
-                            println("There are $shapesRemaining to process, we can fit $cyclesInShapesRemaining of the cycles into that.")
-                            tetris.advanceCycle(shapesAddedInCycle * cyclesInShapesRemaining, heightAddedInCycle * cyclesInShapesRemaining)
-                        } else {
-                            val cacheVal = Pair(tetris.shapeCount, tetris.totalRockHeight())
-                            cycleDetection[cacheKey] = cacheVal
+                            val cyclesInShapesRemaining = shapesRemaining / cycleDelta.second
+                            tetris.advanceCycle(cycleDelta.first * cyclesInShapesRemaining, cycleDelta.second * cyclesInShapesRemaining)
+                        } else if (!cycleDetected) {
+                            cycleDetection[hashKey] = Pair(tetris.totalRockHeight(), tetris.shapeCount)
+                            cycleDetected = true
                         }
                     }
                     tetris.nextShape()
@@ -219,17 +193,18 @@ fun main() {
             isBlowing = !isBlowing
         }
 
-        val totalHeight = tetris.totalRockHeight()
-        return totalHeight
+        return tetris.totalRockHeight()
     }
+
 
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day17_test")
     check(part1(testInput, 2022L) == 3068L)
     println("Part 1 checked out ok!")
-    check(part2(testInput) == 1514285714288L)
+    check(part1(testInput, 1000000000000L) == 1514285714288L)
+    println("Part 2 checked out ok!")
 
     val input = readInput("Day17")
-    println(part1(input))
-    println(part2(input))
+    println(part1(input, 2022L))
+    println(part1(input, 1000000000000L))
 }
